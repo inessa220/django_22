@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from django.conf.global_settings import STATICFILES_DIRS
 
 
 load_dotenv(override=True)
