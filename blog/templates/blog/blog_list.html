@@ -6,7 +6,6 @@
             <h1>Блог</h1>
             <a href="{% url 'blog:blog_create' %}" class="btn btn-primary">Создать новую статью</a>
         </div>
-
         <div class="row">
             {% for post in posts %}
                 <div class="col-md-4">
@@ -19,30 +18,12 @@
                                 <div class="btn-group">
                                     <a href="{% url 'blog:blog_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">Подробнее</a>
                                 </div>
-                                <small class="text-muted">Просмотров: {{ post.views_count }}</small>
+                                <small class="text-muted">Просмотров: {{ post.counter_view }}</small>
                             </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
-        </div>
-
-        <div class="pagination">
-            <span class="step-links">
-                {% if posts.has_previous %}
-                    <a href="?page=1">&laquo; первая</a>
-                    <a href="?page={{ posts.previous_page_number }}">предыдущая</a>
-                {% endif %}
-
-                <span class="current">
-                    Страница {{ posts.number }} из {{ posts.paginator.num_pages }}.
-                </span>
-
-                {% if posts.has_next %}
-                    <a href="?page={{ posts.next_page_number }}">следующая</a>
-                    <a href="?page={{ posts.paginator.num_pages }}">последняя &raquo;</a>
-                {% endif %}
-            </span>
         </div>
     </div>
 {% endblock %}

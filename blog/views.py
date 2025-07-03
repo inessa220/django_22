@@ -24,10 +24,10 @@ class PostDetailView(DetailView):
     template_name = "blog/blog_detail.html"
 
     def get_object(self, queryset=None):
-        blog = super().get_object(queryset)
-        blog.views_count += 1
-        blog.save()
-        return blog
+        self.object = super().get_object(queryset)
+        self.object.counter_view += 1
+        self.object.save()
+        return self.object
 
 
 class PostCreateView(CreateView):
@@ -37,8 +37,6 @@ class PostCreateView(CreateView):
         "title",
         "content",
         "preview",
-        "created_at",
-        "counter_view",
         "is_published",
     )
     success_url = reverse_lazy("blog:blog_list")

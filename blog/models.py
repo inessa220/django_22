@@ -5,13 +5,15 @@ class Post(models.Model):
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     content = models.TextField(verbose_name="Содержимое")
     preview = models.ImageField(
-        verbose_name="Превью (изображение)", blank=True, null=True
+        verbose_name="Превью (изображение)", blank=True, null=True, upload_to="blog/preview"
     )
     created_at = models.DateTimeField(
-        verbose_name="Дата создания", null=True, blank=True
+        verbose_name="Дата создания", auto_now_add=True
     )
     is_published = models.BooleanField(verbose_name="Признак публикации", default=False)
-    counter_view = models.IntegerField(verbose_name="Количество просмотров", default=0)
+    counter_view = models.PositiveIntegerField(
+        verbose_name="Количество просмотров", default=0
+    )
 
     class Meta:
         verbose_name = "Блоговая запись"
