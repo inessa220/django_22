@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.views.generic import (
     ListView,
     DetailView,
@@ -34,32 +35,50 @@ class ProductListView(ListView):
     template_name = "catalog/product_list.html"
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = "catalog/product_detail.html"
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     template_name = "catalog/product_form.html"
     form_class = ProductForm
     success_url = reverse_lazy("catalog:product_list")
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     template_name = "catalog/product_form.html"
     form_class = ProductForm
     success_url = reverse_lazy("catalog:product_list")
+
+    def get_form_class(self):
+        user = self.request.user
+        if user == self.object.owner or user.has_perm("catalog.can_unpublish_product"):
+            return ProductForm
+        raise PermissionDenied("У вас нет прав на редактирование этого продукта.")
 
     def get_success_url(self):
         return reverse("catalog:product_detail", args=[self.kwargs.get("pk")])
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = "catalog/catalog_confirm_delete.html"
     success_url = reverse_lazy("catalog:product_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        product = self.get_object()
+        if request.user != product.owner and not request.user.has_perm(
+            "catalog.can_delete_product"
+        ):
+            raise PermissionDenied("У вас нет прав на удаление этого продукта.")
+        return super().dispatch(request, *args, **kwargs)
 
 
 # def products_list(request):
