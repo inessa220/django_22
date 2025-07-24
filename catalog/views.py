@@ -9,9 +9,11 @@ from django.views.generic import (
     DeleteView,
 )
 from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
 
 from catalog.forms import ProductForm
-from catalog.models import Product
+from catalog.models import Product, Category
+from catalog.services import get_products_from_cache, get_products_by_category
 
 
 class HomeView(TemplateView):
@@ -33,6 +35,9 @@ class ContactsView(TemplateView):
 class ProductListView(ListView):
     model = Product
     template_name = "catalog/product_list.html"
+
+    def get_queryset(self):
+        return get_products_from_cache()
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
@@ -91,3 +96,18 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 #     product = Product.objects.get(pk=pk)
 #     context = {"product": product}
 #     return render(request, "product_detail.html", context)
+
+
+class ListProductsCategory(DetailView):
+    model = Category
+    template_name = "catalog/products_by_category.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category = get_object_or_404(Category, id=self.kwargs.get("category_id"))
+        context["category"] = category
+        return context
+
+    def get_queryset(self):
+        category_id = self.kwargs.get("category_id")
+        return get_products_by_category(category_id)
